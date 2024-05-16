@@ -10,10 +10,8 @@ The Medical API is a RESTful API designed to manage patients and doctors for a c
   - [Features](#features)
   - [Installation](#installation)
   - [Usage](#usage)
-- [Create a new patient](#create-a-new-patient)
-- [Retrieve all patients](#retrieve-all-patients)
-- [Update a patient record](#update-a-patient-record)
-- [Delete a patient record](#delete-a-patient-record)
+  - [API Endpoints](#api-endpoints)
+  - [Patients:](#patients)
 
 ## Introduction
 
@@ -61,6 +59,7 @@ To run the Medical API locally, follow these steps:
     ./medical-api
     ```
 
+
 ## Usage
 
 Once the Medical API is running, you can interact with it using HTTP requests. You can use tools like cURL or Postman to send requests to the API endpoints.
@@ -80,23 +79,25 @@ curl -X PUT -H "Content-Type: application/json" -d '{"name": "Jane Doe"}' http:/
 # Delete a patient record
 curl -X DELETE http://localhost:8080/api/v1/patients/1
 
+```
 
-
-API Endpoints
+ ## API Endpoints
 
 The Medical API exposes the following endpoints:
 
-Patients:
-POST /api/v1/patients: Create a new patient.
-GET /api/v1/patients: Retrieve all patients.
-GET /api/v1/patients/{id}: Retrieve a specific patient.
-PUT /api/v1/patients/{id}: Update a patient.
-DELETE /api/v1/patients/{id}: Delete a patient.
-Doctors:
-POST /api/v1/doctors: Create a new doctor.
-GET /api/v1/doctors: Retrieve all doctors.
-GET /api/v1/doctors/{id}: Retrieve a specific doctor.
-PUT /api/v1/doctors/{id}: Update a doctor.
-DELETE /api/v1/doctors/{id}: Delete a doctor.
+## Patients:
+
+- **POST /api/v1/patients**: Create a new patient.
+- **GET /api/v1/patients**: Retrieve all patients.
+- **GET /api/v1/patients/{id}**: Retrieve a specific patient.
+- **PUT /api/v1/patients/{id}**: Update a patient.
+- **DELETE /api/v1/patients/{id}**: Delete a patient.
+- **Doctors**:
+- **POST /api/v1/doctors**: Create a new doctor.
+- **GET /api/v1/doctors**: Retrieve all doctors.
+- **GET /api/v1/doctors/{id}**: Retrieve a specific doctor.
+- **PUT /api/v1/doctors/{id}**: Update a doctor.
+- **DELETE /api/v1/doctors/{id}**: Delete a doctor.
+- 
 For detailed documentation of each endpoint, refer to the API documentation.
 
