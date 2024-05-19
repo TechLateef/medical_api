@@ -2,7 +2,7 @@ package main
 
 import (
 	"medical_api/config"
-	"medical_api/router"
+	// "medical_api/router"
 
 	"gorm.io/gorm"
 )
@@ -12,8 +12,8 @@ var (
 )
 
 func main() {
-	defer config.CloseDatabasec(db)
+	defer config.CloseDatabase(db)
 
-	router.Routes()
+	// router.Routes()
 
 }

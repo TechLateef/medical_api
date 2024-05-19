@@ -12,9 +12,11 @@ import (
 
 type AuthService interface {
 	VerifyCredential(email string, password string) interface{}
-	CreateUser(user dto.RegisterDTO) model.User
+	CreateUser(user dto.RegisterDTO) model.Patient
 	IsDuplicateEmail(email string) bool
 	ClearUserToken(userID string) error
+	UpdateProfile(user dto.UpdateUserDto, userId uint64) model.Patient
+	DeleteUser(user model.Patient, userId uint64) model.Patient
 }
 
 type authService struct {
@@ -27,8 +29,8 @@ func NewAuthService(userRepo repository.UserRepository) AuthService {
 	}
 }
 
-func (service *authService) CreateUser(user dto.RegisterDTO) model.User {
-	userToCreate := model.User{}
+func (service *authService) CreateUser(user dto.RegisterDTO) model.Patient {
+	userToCreate := model.Patient{}
 	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
 
 	if err != nil {
@@ -40,7 +42,7 @@ func (service *authService) CreateUser(user dto.RegisterDTO) model.User {
 
 func (service *authService) VerifyCredential(email string, password string) interface{} {
 	res := service.userRepository.VerifyUser(email, password)
-	if v, ok := res.(model.User); ok {
+	if v, ok := res.(model.Patient); ok {
 		comparedPassword := comparePassword(v.Password, []byte(password))
 		if v.Email == email && comparedPassword {
 			return res
@@ -75,4 +77,33 @@ func (service *authService) ClearUserToken(userID string) error {
 	user.Token = ""
 
 	return service.userRepository.Save(user)
+}
+
+func (service *authService) UpdateProfile(user dto.UpdateUserDto, userId uint64) model.Patient {
+	updateUser := model.Patient{}
+
+	err := smapping.FillStruct(&updateUser, smapping.MapFields(&user))
+	if err != nil {
+		log.Fatalf("Failed to map %v", err)
+	}
+
+	// Ensure the ID is correctly set
+	updateUser.Id = userId
+
+	res := service.userRepository.UpdateProfile(updateUser, userId)
+	return res
+}
+
+func (service *authService) DeleteUser(user model.Patient, userId uint64) model.Patient {
+	userToDelete := model.Patient{}
+
+	err := smapping.FillStruct(&userToDelete, smapping.MapFields(&user))
+	if err != nil {
+		log.Fatalf("failed map %v", err)
+
+	}
+
+	userToDelete.Id = userId
+	res := service.userRepository.DeleteUser(userToDelete, userId)
+	return res
 }

@@ -16,6 +16,8 @@ type AuthController interface {
 	Login(ctx *gin.Context)
 	Register(ctx *gin.Context)
 	Logout(ctx *gin.Context)
+	DeleteUser(ctx *gin.Context)
+	UpdateProfile(ctx *gin.Context)
 }
 
 type authController struct {
@@ -40,7 +42,7 @@ func (c *authController) Login(ctx *gin.Context) {
 
 	authResult := c.authService.VerifyCredential(loginDto.Email, loginDto.Password)
 
-	if user, ok := authResult.(model.User); ok {
+	if user, ok := authResult.(model.Patient); ok {
 		generateToken := c.jwtServive.GeneratedToken(user.Role, strconv.FormatUint(user.Id, 10))
 		user.Token = generateToken
 		ctx.JSON(http.StatusOK, user)
@@ -108,4 +110,30 @@ func (c *authController) Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, createUser)
 
 	}
+}
+
+func (c *authController) UpdateProfile(ctx *gin.Context) {
+	var updateUser dto.UpdateUserDto
+	ctx.ShouldBind(&updateUser)
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+	updateUser.Id = id
+	result := c.authService.UpdateProfile(updateUser, id)
+
+	ctx.JSON(http.StatusBadRequest, result)
+}
+
+func (c *authController) DeleteUser(ctx *gin.Context) {
+
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+	var user model.Patient
+	user.Id = id
+	res := c.authService.DeleteUser(user, id)
+	ctx.JSON(http.StatusBadRequest, res)
+
 }

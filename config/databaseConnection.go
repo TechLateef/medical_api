@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"medical_api/model"
 	"os"
 
@@ -13,7 +14,7 @@ import (
 func SetupDatabaseConnection() *gorm.DB {
 	err := godotenv.Load()
 	if err != nil {
-		panic("Failed to load env file")
+		log.Fatal("Failed to load env file:", err)
 	}
 
 	dbDatabase := os.Getenv("DB_DATABASE")
@@ -22,27 +23,33 @@ func SetupDatabaseConnection() *gorm.DB {
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 
-	fmt.Print(dbDatabase)
-	fmt.Println(dbHost)
-	fmt.Println(dbPort)
+	if dbDatabase == "" || dbUser == "" || dbPassword == "" || dbHost == "" || dbPort == "" {
+		log.Fatal("Missing required environment variables")
+	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=Asia/Shanghai", dbHost, dbUser, dbPassword, dbDatabase)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", dbHost, dbUser, dbPassword, dbDatabase, dbPort)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
 	if err != nil {
-		panic("Failed to load env file")
-
+		log.Fatal("Failed to connect to database:", err)
 	}
-	db.AutoMigrate(&model.User{})
-	return db
 
+	// Auto-migrate all models
+	err = db.AutoMigrate(&model.Patient{}, &model.Doctor{}, &model.MedicalRecord{})
+	if err != nil {
+		log.Fatal("Failed to perform auto migration:", err)
+	}
+
+	return db
 }
 
-func CloseDatabasec(db *gorm.DB) {
+func CloseDatabase(db *gorm.DB) {
 	dbPostgre, err := db.DB()
 	if err != nil {
-		panic("Failed ")
+		log.Fatal("Failed to get database connection:", err)
 	}
-	dbPostgre.Close()
+	err = dbPostgre.Close()
+	if err != nil {
+		log.Fatal("Failed to close database connection:", err)
+	}
 }
