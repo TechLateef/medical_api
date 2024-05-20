@@ -1,86 +1,71 @@
 package router
 
-// import (
-// 	"net/http"
-// 	"medical_api/config"
-// 	"medical_api/controllers"
-// 	"medical_api/repository"
-// 	"medical_api/services"
+import (
+	"medical_api/config"
+	"medical_api/controllers"
+	"medical_api/repository"
+	"medical_api/services"
+	"net/http"
 
-// 	"github.com/gin-gonic/gin"
-// 	"gorm.io/gorm"
-// )
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
 
-// var (
-// 	db *gorm.DB = config.SetupDatabaseConnection()
+var (
+	db *gorm.DB = config.SetupDatabaseConnection()
 
-// 	// User Repository and Services
-// 	userRepo    repository.UserRepository    = repository.NewUserRepository(db)
-// 	userServ    services.AuthService         = services.NewAuthService(userRepo)
-// 	jwtServ     services.JWTService          = services.NewJWTService()
-// 	authCtrl    controllers.AuthController   = controllers.NewAuthController(userServ, jwtServ)
+	// User Repository and Services
+	userRepo repository.UserRepository  = repository.NewUserRepository(db)
+	userServ services.AuthService       = services.NewAuthService(userRepo)
+	jwtServ  services.JWTService        = services.NewJWTService()
+	authCtrl controllers.AuthController = controllers.NewAuthController(userServ, jwtServ)
 
-// 	// Patient Repository and Services
-// 	patientRepo repository.PatientRepository = repository.NewPatientRepository(db)
-// 	patientServ services.PatientService      = services.NewPatientService(patientRepo)
-// 	patientCtrl controllers.PatientController = controllers.NewPatientController(patientServ)
+	// Doctor Repository and Services
+	doctorRepo repository.DoctorRepository  = repository.NewDoctorRepository(db)
+	doctorServ services.DoctorService       = services.NewDoctorService(doctorRepo)
+	doctorCtrl controllers.DoctorController = controllers.NewDoctorController(doctorServ)
 
-// 	// Doctor Repository and Services
-// 	doctorRepo repository.DoctorRepository   = repository.NewDoctorRepository(db)
-// 	doctorServ services.DoctorService        = services.NewDoctorService(doctorRepo)
-// 	doctorCtrl controllers.DoctorController  = controllers.NewDoctorController(doctorServ)
+	// Medical Record Repository and Services
+	medicalRecordRepo repository.MedicalRecordRepository  = repository.NewMedicalRecordRepository(db)
+	medicalRecordServ services.MedicalRecordService       = services.NewMedicalRecordService(medicalRecordRepo)
+	medicalRecordCtrl controllers.MedicalRecordController = controllers.NewMedicalRecordController(medicalRecordServ)
+)
 
-// 	// Medical Record Repository and Services
-// 	medicalRecordRepo repository.MedicalRecordRepository = repository.NewMedicalRecordRepository(db)
-// 	medicalRecordServ services.MedicalRecordService      = services.NewMedicalRecordService(medicalRecordRepo)
-// 	medicalRecordCtrl controllers.MedicalRecordController = controllers.NewMedicalRecordController(medicalRecordServ)
-// )
+func Routes() {
+	route := gin.Default()
 
-// func Routes() {
-// 	route := gin.Default()
+	route.GET("/", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "Application is up and running")
+	})
 
-// 	route.GET("/", func(ctx *gin.Context) {
-// 		ctx.String(http.StatusOK, "Application is up and running")
-// 	})
+	// Auth Routes
+	authRoute := route.Group("/api/v1/auth")
+	{
+		authRoute.POST("/create", authCtrl.Register)
+		authRoute.POST("/login", authCtrl.Login)
+		authRoute.POST("/logout", authCtrl.Logout)
+	}
 
-// 	// Auth Routes
-// 	authRoute := route.Group("/api/v1/auth")
-// 	{
-// 		authRoute.POST("/create", authCtrl.Register)
-// 		authRoute.POST("/login", authCtrl.Login)
-// 		authRoute.POST("/logout", authCtrl.Logout)
-// 	}
+	// Doctor Routes
+	doctorRoute := route.Group("/api/v1/doctors")
+	{
+		doctorRoute.GET("/", doctorCtrl.GetAllDoctors)
+		doctorRoute.POST("/", doctorCtrl.CreateDoctor)
+		doctorRoute.GET("/:id", doctorCtrl.FindDoctorByID)
+		doctorRoute.PUT("/:id", doctorCtrl.UpdateDoctor)
+		doctorRoute.DELETE("/:id", doctorCtrl.DeleteDoctor)
+	}
 
-// 	// Patient Routes
-// 	patientRoute := route.Group("/api/v1/patients")
-// 	{
-// 		patientRoute.GET("/", patientCtrl.GetAllPatients)
-// 		patientRoute.POST("/", patientCtrl.CreatePatient)
-// 		patientRoute.GET("/:id", patientCtrl.FindPatientByID)
-// 		patientRoute.PUT("/:id", patientCtrl.UpdatePatient)
-// 		patientRoute.DELETE("/:id", patientCtrl.DeletePatient)
-// 	}
+	// Medical Record Routes
+	medicalRecordRoute := route.Group("/api/v1/medical-records")
+	{
+		medicalRecordRoute.GET("/", medicalRecordCtrl.GetAllMedicalRecords)
+		medicalRecordRoute.POST("/", medicalRecordCtrl.CreateMedicalRecord)
+		medicalRecordRoute.GET("/:id", medicalRecordCtrl.FindMedicalRecordByID)
+		medicalRecordRoute.PATCH("/:id", medicalRecordCtrl.UpdateMedicalRecord)
+		medicalRecordRoute.DELETE("/:id", medicalRecordCtrl.DeleteMedicalRecord)
+	}
 
-// 	// Doctor Routes
-// 	doctorRoute := route.Group("/api/v1/doctors")
-// 	{
-// 		doctorRoute.GET("/", doctorCtrl.GetAllDoctors)
-// 		doctorRoute.POST("/", doctorCtrl.CreateDoctor)
-// 		doctorRoute.GET("/:id", doctorCtrl.FindDoctorByID)
-// 		doctorRoute.PUT("/:id", doctorCtrl.UpdateDoctor)
-// 		doctorRoute.DELETE("/:id", doctorCtrl.DeleteDoctor)
-// 	}
-
-// 	// Medical Record Routes
-// 	medicalRecordRoute := route.Group("/api/v1/medical-records")
-// 	{
-// 		medicalRecordRoute.GET("/", medicalRecordCtrl.GetAllMedicalRecords)
-// 		medicalRecordRoute.POST("/", medicalRecordCtrl.CreateMedicalRecord)
-// 		medicalRecordRoute.GET("/:id", medicalRecordCtrl.FindMedicalRecordByID)
-// 		medicalRecordRoute.PUT("/:id", medicalRecordCtrl.UpdateMedicalRecord)
-// 		medicalRecordRoute.DELETE("/:id", medicalRecordCtrl.DeleteMedicalRecord)
-// 	}
-
-// 	// Run route whenever triggered
-// 	route.Run()
-// }
+	// Run route whenever triggered
+	route.Run()
+}
