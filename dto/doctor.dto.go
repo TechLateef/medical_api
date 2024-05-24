@@ -13,3 +13,11 @@ type UpdateDoctorDTO struct {
 	Specialty   string `json:"specialty"`
 	PhoneNumber string `json:"phone_number"`
 }
+
+type DoctorDTO struct {
+	ID          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Specialty   string `json:"specialty"`
+	PhoneNumber string `json:"phone_number"`
+	HospitalID  uint64 `json:"hospital_id"`
+}
